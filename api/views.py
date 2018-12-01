@@ -89,7 +89,6 @@ def filter_and_sort_products(request, minprice, maxprice, sort, order):
         _sort = '-%s' % sort
 
     offers = Offer.objects.filter(hilite__range=(minprice, maxprice)).order_by(_sort)
-
     return JsonResponse(toJson(offers))
 
 """
