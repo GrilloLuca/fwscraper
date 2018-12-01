@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.template.loader import render_to_string
+from django.core import serializers
 
 import json
 import urllib.request
@@ -11,6 +12,11 @@ import re
 
 url = "https://www.fastweb.it/"
 
+"""
+Scraping and saving data from db
+returns True if success
+api/save_offers
+"""
 def save_offers(request):
 
     request = urllib.request.Request(url)
@@ -50,48 +56,41 @@ def save_offers(request):
          
     return JsonResponse({"result": True})
 
+"""
+Get all products without filter and order
+api/get_all_offers/minprice/maxprice
+"""
 def get_all_offers(request):
 
     offers = Offer.objects.all()
+    return JsonResponse(toJson(offers))
 
-    obj = {
-        'url': url,
-        'offers': []
-    }
-
-    for offer in offers:
-        obj['offers'].append({
-            'product': offer.product,
-            'menulink': offer.menulink,
-            'hilite': offer.hilite,
-            'description': offer.description
-        })
-
-    return JsonResponse(obj)
-
-def get_product(request, product):
-
-    offers = Offer.objects.filter(product__contains=product)
-
-    obj = {
-        'url': url,
-        'offers': []
-    }
-
-    for offer in offers:
-        obj['offers'].append({
-            'product': offer.product,
-            'menulink': offer.menulink,
-            'hilite': offer.hilite,
-            'description': offer.description
-        })
-
-    return JsonResponse(obj)
-
-
+"""
+Filtering product by min price and max price
+api/filter_products/minprice/maxprice
+"""
 def filter_products(request, minprice, maxprice):
 
     offers = Offer.objects.filter(hilite__range=(minprice, maxprice))
+    return JsonResponse(toJson(offers))
+
+"""
+Filtering product by min price and max price and sort by fieldname
+api/filter_products/minprice/maxprice/sort/order
+"""
+def filter_and_sort_products(request, minprice, maxprice, sort, order):
+
+    _sort = sort
+    if order == 'desc':
+        _sort = '-%s' % sort
+
+    offers = Offer.objects.filter(hilite__range=(minprice, maxprice)).order_by(_sort)
+    return JsonResponse(toJson(offers))
+
+"""
+convert Django model to json object
+"""
+def toJson(offers):
 
     obj = {
         'url': url,
@@ -106,4 +105,4 @@ def filter_products(request, minprice, maxprice):
             'description': offer.description
         })
 
-    return JsonResponse(obj)
+    return obj
