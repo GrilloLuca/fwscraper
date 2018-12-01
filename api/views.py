@@ -111,6 +111,9 @@ def toJson(offers):
 
     return obj
 
+"""
+Store user data to Analytics table
+"""
 @csrf_exempt
 def log_analytics(request):
     if request.method == 'POST':
@@ -122,7 +125,9 @@ def log_analytics(request):
 
     return JsonResponse({'response': request.user.username})
 
-
+"""
+serve the CSRF token
+"""
 @ensure_csrf_cookie
 def token_security(request):
     return JsonResponse({'token': django.middleware.csrf.get_token(request)}) 
