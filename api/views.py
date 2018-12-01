@@ -1,14 +1,18 @@
 from django.shortcuts import render
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.template.loader import render_to_string
 from django.core import serializers
+from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
 
 import json
 import urllib.request
 import certifi
-from api.models import Offer
+from api.models import Offer, Analytics
 from bs4 import BeautifulSoup
 import re
+import os
+import getpass
+import django
 
 url = "https://www.fastweb.it/"
 
@@ -85,6 +89,7 @@ def filter_and_sort_products(request, minprice, maxprice, sort, order):
         _sort = '-%s' % sort
 
     offers = Offer.objects.filter(hilite__range=(minprice, maxprice)).order_by(_sort)
+
     return JsonResponse(toJson(offers))
 
 """
@@ -106,3 +111,19 @@ def toJson(offers):
         })
 
     return obj
+
+@csrf_exempt
+def log_analytics(request):
+    if request.method == 'POST':
+        response = json.loads(request.body)
+        print(response['action'], response['data'])
+
+        user = getpass.getuser()
+        Analytics.objects.create(user=user, action=response['action'], data=response['data'])
+
+    return JsonResponse({'response': request.user.username})
+
+
+@ensure_csrf_cookie
+def token_security(request):
+    return JsonResponse({'token': django.middleware.csrf.get_token(request)}) 

@@ -25,9 +25,7 @@ SECRET_KEY = '^m&9yw8*cx_u3ku%^a*fo82j+@7ijptr&563fj-z+w9!mkonk*'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
-
+ALLOWED_HOSTS = ['*'] 
 # Application definition
 
 INSTALLED_APPS = [
@@ -52,8 +50,10 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+CORS_ORIGIN_ALLOW_ALL = True
 CORS_ORIGIN_WHITELIST = (
-  'http://localhost:4200/'
+  'http://localhost:4200/',
+  'localhost:4200'
 )
 
 ROOT_URLCONF = 'fwscraperweb.urls'
